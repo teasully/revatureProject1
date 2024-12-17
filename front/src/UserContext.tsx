@@ -1,24 +1,51 @@
 import { createContext, Dispatch, useReducer } from "react";
-import { User } from "./User";
+import { User, UserType } from "./Entities/User";
 
-//
-function UserReducer(userState: User, action: string) {
-  switch (action) {
+// Reducer actions
+export enum UserAction {
+  NONE,
+
+  LOGIN
+}
+
+// Handle user context actions
+interface UserReducerData {
+  action: UserAction,
+
+  payload?: any
+}
+function userReducer(userState: User, reducerData: UserReducerData) {
+  switch (reducerData.action) {
+
+    case UserAction.LOGIN:
+      return {
+        ...userState,
+
+        username: reducerData.payload?.username,
+        role: UserType.MANAGER,
+
+        authenticated: true
+      }
 
     default:
+
+      if (reducerData.payload) {
+        console.log(reducerData.payload);
+      }
+
       return userState;
   }
 }
 
-// Create user context, pass context and dispatch for reducer
+// Create user provider, pass context and dispatch to children
 export const UserContext = createContext(new User());
-export const UserDispatch = createContext<Dispatch<string> | undefined>(undefined);
+export const UserDispatch = createContext<Dispatch<UserReducerData> | undefined>(undefined);
 
-interface UserProviderProps{
+interface UserProviderProps {
   children: React.ReactNode
 }
-export function UserProvider(props : UserProviderProps) {
-  const [userState, userDispatch] = useReducer(UserReducer, new User());
+export function UserProvider(props: UserProviderProps) {
+  const [userState, userDispatch] = useReducer(userReducer, new User());
 
   return (
     <>
