@@ -25,18 +25,16 @@ function Tickets() {
       </p>
 
       <p>User role: {userContext.role}</p>
+      <hr />
 
       {
         userContext.role == UserType.MANAGER ? (
           <>
             <button onClick={() => { setView(TicketPageType.CREATE) }}>Create Ticket</button>
             <button onClick={() => { setView(TicketPageType.PROCESS) }}>Process Tickets</button>
-            <hr />
           </>
         ) : <></>
       }
-
-      <hr />
 
       <h2>Ticket mode: {currentView == TicketPageType.CREATE ? "Create" : "Process"}</h2>
 

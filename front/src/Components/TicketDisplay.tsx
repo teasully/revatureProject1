@@ -51,7 +51,7 @@ export default function TicketDisplay(props: TicketListProps) {
               Submitted by
             </Form.Label>
             <Col>
-              <Form.Control plaintext readOnly defaultValue={viewType == TicketPageType.CREATE ? userContext.username : ticket.submittedById} />
+              <Form.Control plaintext readOnly defaultValue={viewType == TicketPageType.CREATE ? `${userContext.username} (you)` : ticket.submittedById} />
             </Col>
           </Form.Group>
 

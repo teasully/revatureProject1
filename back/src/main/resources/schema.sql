@@ -1,21 +1,21 @@
 -- Drop tables
-DROP TABLE IF EXISTS public.ticket;
-DROP TABLE IF EXISTS public.user;
+DROP TABLE IF EXISTS ticket;
+DROP TABLE IF EXISTS users;
 
 -- Create tables
-CREATE TABLE public.user (
+CREATE TABLE users (
 
 	user_id SERIAL PRIMARY KEY,
 
 	username TEXT NOT NULL,
 	password TEXT NOT NULL
 );
-CREATE TABLE public.ticket (
+CREATE TABLE ticket (
 
 	ticket_id SERIAL PRIMARY KEY,
 
-	submitted_by_id INT REFERENCES public.user(user_id) NOT NULL,
-	processed_by_id INT REFERENCES public.user(user_id) NOT NULL DEFAULT 1,
+	submitted_by_id INT REFERENCES users(user_id) NOT NULL,
+	processed_by_id INT REFERENCES users(user_id) NOT NULL DEFAULT 1,
 
 	status INT NOT NULL DEFAULT 0,
 
@@ -24,4 +24,4 @@ CREATE TABLE public.ticket (
 );
 
 -- Insert sample data
-INSERT INTO public.user (username, password) VALUES ('system', '');
+INSERT INTO users (username, password) VALUES ('system', '');

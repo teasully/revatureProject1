@@ -5,7 +5,8 @@ import { User, UserType } from "./Entities/User";
 export enum UserAction {
   NONE,
 
-  LOGIN
+  LOGIN,
+  LOGOUT,
 }
 
 // Handle user context actions
@@ -26,6 +27,9 @@ function userReducer(userState: User, reducerData: UserReducerData) {
 
         authenticated: true
       }
+
+    case UserAction.LOGOUT:
+      return new User();
 
     default:
 

@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { UserContext } from "../UserContext";
+import { UserAction, UserContext, UserDispatch } from "../UserContext";
 
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
@@ -12,6 +12,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function Navbar() {
 
   const userContext = useContext(UserContext);
+  const userDispatch = useContext(UserDispatch);
 
   return (
     <>
@@ -27,7 +28,9 @@ function Navbar() {
               {userContext.authenticated ? (
                 <>
                   <NavDropdown title="Account" id="basic-nav-dropdown">
-                    <NavDropdown.Item as={Link} to="/logout">Log Out</NavDropdown.Item>
+                    <NavDropdown.Item onClick={() => {
+                      userDispatch?.({ action: UserAction.LOGOUT });
+                    }}>Log Out</NavDropdown.Item>
                   </NavDropdown>
                 </>
               ) : (
