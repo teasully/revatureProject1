@@ -25,3 +25,4 @@ CREATE TABLE ticket (
 
 -- Insert sample data
 INSERT INTO users (username, password) VALUES ('system', '');
+INSERT INTO users (username, password) VALUES ('mr. manager', '0');

@@ -16,7 +16,7 @@ export default function TicketList(props: TicketListProps) {
     <>
       {tickets.map((ticket: Ticket) => {
         return (
-          <TicketDisplay ticket={ticket} viewType={viewType} key={ticket.id} />
+          <TicketDisplay ticket={ticket} viewType={viewType} key={ticket.ticketId} />
         );
       })}
     </>

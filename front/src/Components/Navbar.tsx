@@ -26,17 +26,13 @@ function Navbar() {
             </Nav>
             <Nav>
               {userContext.authenticated ? (
-                <>
-                  <NavDropdown title="Account" id="basic-nav-dropdown">
-                    <NavDropdown.Item onClick={() => {
-                      userDispatch?.({ action: UserAction.LOGOUT });
-                    }}>Log Out</NavDropdown.Item>
-                  </NavDropdown>
-                </>
+                <NavDropdown title="Account" id="basic-nav-dropdown">
+                  <NavDropdown.Item onClick={() => {
+                    userDispatch?.({ action: UserAction.LOGOUT });
+                  }}>Log Out</NavDropdown.Item>
+                </NavDropdown>
               ) : (
-                <>
-                  <Nav.Link as={Link} to="/login">Log In</Nav.Link>
-                </>
+                <Nav.Link as={Link} to="/login">Log In</Nav.Link>
               )}
             </Nav>
           </BNavbar.Collapse>

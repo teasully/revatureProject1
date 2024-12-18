@@ -21,7 +21,6 @@ public class User {
 
   // Constructors
   public User() {
-    userId = 1;
   }
 
   // Getters / Setters

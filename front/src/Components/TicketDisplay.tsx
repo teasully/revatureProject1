@@ -40,7 +40,7 @@ export default function TicketDisplay(props: TicketListProps) {
                 {viewType == TicketPageType.CREATE ?
                   <Form.Control plaintext readOnly defaultValue="---" />
                   :
-                  <Form.Control plaintext readOnly defaultValue={ticket.id} />
+                  <Form.Control plaintext readOnly defaultValue={ticket.ticketId} />
                 }
               </Col>
             </Form.Group>

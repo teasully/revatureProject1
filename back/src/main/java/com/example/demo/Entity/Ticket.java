@@ -32,12 +32,8 @@ public class Ticket {
   private String description;
 
   // Constructors
-  public Ticket(User submittedBy) {
-    submittedById = submittedBy.getUserId();
-    processedById = 1;
-
-    amount = 0f;
-    description = "Test";
+  public Ticket() {
+    this.processedById = 1;
   }
 
   // Getters / Setters

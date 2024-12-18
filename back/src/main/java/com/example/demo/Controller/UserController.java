@@ -5,9 +5,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.example.demo.Service.UserService;
 import com.example.demo.Entity.User;
@@ -23,12 +21,41 @@ public class UserController {
     this.userService = userService;
   }
 
-  // Endpoints
+  /// Endpoints
+  // Get a user's name by userId
+  @CrossOrigin(origins = "http://localhost:5174")
+  @PostMapping("/getName")
+  public ResponseEntity<String> getUsername(@RequestBody User user) {
+
+    // Sanitize input
+    var id = user.getUserId();
+    if (id == null) {
+      return ResponseEntity.status(422).body("");
+    }
+
+    // Check user exists with username and password combo
+    var existingUser = userService.getById(id);
+    if (existingUser == null) {
+      return ResponseEntity.status(404).body("");
+    }
+
+    // Return ok
+    return ResponseEntity.ok(existingUser.getUsername());
+  }
+
+  // Check if username/password combo is correct
   @CrossOrigin(origins = "http://localhost:5174")
   @PostMapping("/login")
   public ResponseEntity<Boolean> login(@RequestBody User user) {
-    var username = user.getUsername().trim().toLowerCase();
-    var password = user.getPassword().trim();
+
+    // Sanitize input
+    var username = user.getUsername();
+    var password = user.getPassword();
+    if (username == null || password == null) {
+      return ResponseEntity.status(422).body(false);
+    }
+    username = username.trim().toLowerCase();
+    password = password.trim();
 
     // Make sure not logging in as system
     if (username.equals("system")) {
@@ -36,7 +63,7 @@ public class UserController {
     }
 
     // Check user exists with username and password combo
-    var existingUser = userService.GetUser(username, password);
+    var existingUser = userService.getByUsernameAndPassword(username, password);
     if (existingUser == null) {
       return ResponseEntity.status(401).body(false);
     }
@@ -45,9 +72,17 @@ public class UserController {
     return ResponseEntity.ok(true);
   }
 
+  // Register a new user account using username and password
   @CrossOrigin(origins = "http://localhost:5174")
   @PostMapping("/register")
-  public ResponseEntity<Boolean> RegisterUser(@RequestParam String username, @RequestParam String password) {
+  public ResponseEntity<Boolean> RegisterUser(@RequestBody User user) {
+
+    // Sanitize input
+    var username = user.getUsername();
+    var password = user.getPassword();
+    if (username == null || password == null) {
+      return ResponseEntity.status(422).body(false);
+    }
     username = username.trim().toLowerCase();
     password = password.trim();
 
@@ -62,7 +97,7 @@ public class UserController {
     }
 
     // Check user does not exists
-    var existingUser = userService.GetUser(username);
+    var existingUser = userService.getByUsername(username);
     if (existingUser != null) {
       return ResponseEntity.status(409).body(false);
     }
@@ -71,7 +106,8 @@ public class UserController {
     var newUser = new User();
     newUser.setUsername(username);
     newUser.setPassword(password);
-    userService.InsertUser(newUser);
+
+    userService.insert(newUser);
 
     // Return ok
     return ResponseEntity.ok(true);

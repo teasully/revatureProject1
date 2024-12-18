@@ -15,19 +15,24 @@ public class UserService {
   }
 
   // Insert a new user
-  public User InsertUser(User user) {
+  public User insert(User user) {
     return userRepository.save(user);
   }
 
   // Check if user exists
-  public User GetUser(String username) {
-    var user = userRepository.findByUsername(username);
-    return user;
-  }
-  public User GetUser(String username, String password) {
-    var user = userRepository.findByUsernameAndPassword(username, password);
+  public User getById(int id) {
+    var user = userRepository.findByUserId(id);
     return user;
   }
 
+  public User getByUsername(String username) {
+    var user = userRepository.findByUsername(username);
+    return user;
+  }
+
+  public User getByUsernameAndPassword(String username, String password) {
+    var user = userRepository.findByUsernameAndPassword(username, password);
+    return user;
+  }
 
 }

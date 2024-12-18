@@ -1,13 +1,11 @@
 export enum TicketStatus {
-  NONE,
-
   PENDING,
 
   APPROVED,
   DENIED
 }
 export default class Ticket {
-  id: number;
+  ticketId: number;
 
   submittedById: number;
   processById: number;
@@ -17,8 +15,8 @@ export default class Ticket {
 
   status: TicketStatus;
 
-  constructor(id: number) {
-    this.id = id;
+  constructor(ticketId: number) {
+    this.ticketId = ticketId;
 
     this.submittedById = 0;
     this.processById = 0;
@@ -26,6 +24,6 @@ export default class Ticket {
     this.amount = 0;
     this.description = "";
 
-    this.status = TicketStatus.NONE;
+    this.status = TicketStatus.PENDING;
   }
 }
