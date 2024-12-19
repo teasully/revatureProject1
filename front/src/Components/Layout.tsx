@@ -15,6 +15,9 @@ class Layout extends Component {
           <Navbar />
           <Outlet />
         </UserProvider>
+
+        <hr />
+
       </Container>
     );
   }

@@ -25,51 +25,53 @@ public class UserController {
   // Get a user's name by userId
   @CrossOrigin(origins = "http://localhost:5174")
   @PostMapping("/getName")
-  public ResponseEntity<String> getUsername(@RequestBody User user) {
+  public ResponseEntity<User> getUsername(@RequestBody User user) {
 
     // Sanitize input
     var id = user.getUserId();
     if (id == null) {
-      return ResponseEntity.status(422).body("");
+      return ResponseEntity.status(422).body(null);
     }
 
     // Check user exists with username and password combo
     var existingUser = userService.getById(id);
     if (existingUser == null) {
-      return ResponseEntity.status(404).body("");
+      return ResponseEntity.status(404).body(null);
     }
 
     // Return ok
-    return ResponseEntity.ok(existingUser.getUsername());
+    user.setUsername(existingUser.getUsername());
+    return ResponseEntity.ok(user);
   }
 
   // Check if username/password combo is correct
   @CrossOrigin(origins = "http://localhost:5174")
   @PostMapping("/login")
-  public ResponseEntity<Boolean> login(@RequestBody User user) {
+  public ResponseEntity<User> login(@RequestBody User user) {
 
     // Sanitize input
     var username = user.getUsername();
     var password = user.getPassword();
     if (username == null || password == null) {
-      return ResponseEntity.status(422).body(false);
+      return ResponseEntity.status(422).body(null);
     }
     username = username.trim().toLowerCase();
     password = password.trim();
 
     // Make sure not logging in as system
     if (username.equals("system")) {
-      return ResponseEntity.status(401).body(false);
+      return ResponseEntity.status(401).body(null);
     }
 
     // Check user exists with username and password combo
     var existingUser = userService.getByUsernameAndPassword(username, password);
     if (existingUser == null) {
-      return ResponseEntity.status(401).body(false);
+      return ResponseEntity.status(401).body(null);
     }
 
     // Return ok
-    return ResponseEntity.ok(true);
+    existingUser.setPassword(null);
+    return ResponseEntity.ok(existingUser);
   }
 
   // Register a new user account using username and password
@@ -106,6 +108,7 @@ public class UserController {
     var newUser = new User();
     newUser.setUsername(username);
     newUser.setPassword(password);
+    newUser.setRole("employee");
 
     userService.insert(newUser);
 

@@ -2,10 +2,10 @@ import { useContext, useEffect } from "react";
 import { UserDispatch, UserAction, UserContext } from "../UserContext";
 import { Link, useNavigate } from "react-router-dom";
 
-// Attempt to login user
-async function fetchAuthenticate(username: string, password: string, dispatchFunction: any, onSuccess: Function, onFail: Function) {
+// Attempt to register user
+async function fetchRegister(username: string, password: string, dispatchFunction: any, onSuccess: Function, onFail: Function) {
   try {
-    const response = await fetch('http://localhost:8080/user/login', {
+    const response = await fetch('http://localhost:8080/user/register', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -16,14 +16,14 @@ async function fetchAuthenticate(username: string, password: string, dispatchFun
       })
     });
     if (!response.ok) {
-      onFail("Invalid user account");
+      onFail("Failed to create user account");
       return;
     }
 
     const json = await response.json();
 
     // If got json response, set context
-    if (json) {
+    if (json == true) {
       onSuccess();
 
       dispatchFunction?.({
@@ -32,11 +32,8 @@ async function fetchAuthenticate(username: string, password: string, dispatchFun
           userId: json.userId
         }
       });
-
-      if (json.role === "manager")
-        dispatchFunction?.({ action: UserAction.ASSIGN_MANAGER });
     } else {
-      onFail("Invalid user account");
+      onFail("Failed to create user account");
     }
   } catch (e) {
     console.log(e);
@@ -45,7 +42,7 @@ async function fetchAuthenticate(username: string, password: string, dispatchFun
   }
 }
 
-export default function Login() {
+export default function Register() {
 
   // Check successful login; redirect to home page
   const userContext = useContext(UserContext);
@@ -61,8 +58,8 @@ export default function Login() {
   const userDispatch = useContext(UserDispatch);
   return (
     <>
-      <h1>Login page</h1>
-      <p>Login to an existing account.</p>
+      <h1>Register page</h1>
+      <p>Your password must be at least 8 chatacters long.</p>
 
       <table>
         <tbody>
@@ -77,7 +74,7 @@ export default function Login() {
         </tbody>
       </table>
 
-      <input type="submit" value="Login" onClick={(e) => {
+      <input type="submit" value="Register" onClick={(e) => {
         e.preventDefault();
         var currentTarget = e.currentTarget;
         currentTarget.disabled = true;
@@ -85,15 +82,17 @@ export default function Login() {
         let username = (document.getElementById("username") as HTMLInputElement).value;
         let password = (document.getElementById("password") as HTMLInputElement).value;
 
-        fetchAuthenticate(username, password, userDispatch,
-          () => { },
+        fetchRegister(username, password, userDispatch,
+          () => {
+
+          },
           (errorMessage: string) => {
             currentTarget.disabled = false;
             (document.getElementById("fail-message") as HTMLElement).innerHTML = errorMessage;
           });
       }}></input>
 
-      <br /><Link to="/register">Create new account</Link>
+      <br /><Link to="/login">Login to existing account</Link>
 
       <p id="fail-message" style={{ color: "red" }}></p>
     </>

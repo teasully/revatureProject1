@@ -5,9 +5,10 @@ import Row from 'react-bootstrap/Row';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import { InputGroup } from "react-bootstrap";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../UserContext";
 import { TicketPageType } from "../Pages/Tickets";
+import { SetTicketsContext, TicketsContext } from "./TicketContext";
 
 // Defines the display structure of a ticket- displays differently if creating a ticket or viewing a past ticket
 interface TicketListProps {
@@ -22,67 +23,229 @@ export default function TicketDisplay(props: TicketListProps) {
 
   const userContext = useContext(UserContext);
 
+  const [ticketAmount, setTicketAmount] = useState(0);
+  const [ticketDescription, setTicketDescription] = useState('');
+  const [ticketUser, setTicketUser] = useState('');
+  const [ticketStatus, setTicketStatus] = useState(ticket.status);
+
+  const ticketsContext = useContext(TicketsContext);
+  const setTicketsContext = useContext(SetTicketsContext);
+
+  // Attempt to gather all users tickets
+  async function fetchSubmitTicket(onSuccess: Function, onFail: Function) {
+    try {
+      const response = await fetch('http://localhost:8080/ticket/submit', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          submittedById: userContext.userId,
+          amount: ticketAmount,
+          description: ticketDescription
+        })
+      });
+      if (!response.ok) {
+        onFail("Invalid ticket information");
+        return;
+      }
+
+      const json = await response.json();
+
+      // If got json response, set context
+      if (json) {
+        onSuccess();
+
+        setTicketsContext?.([json, ...ticketsContext]);
+      } else {
+        onFail("Invalid ticket information");
+      }
+    } catch (e) {
+      console.log(e);
+
+      onFail("Internal server error");
+    }
+  }
+
+  async function fetchSetStatus(status: number, onSuccess: Function, onFail: Function) {
+    try {
+      const response = await fetch('http://localhost:8080/ticket/setStatus', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ticketId: ticket.ticketId,
+          status: status
+        })
+      });
+      if (!response.ok) {
+        onFail("Invalid ticket information");
+        return;
+      }
+
+      const json = await response.json();
+
+      // If got json response, set context
+      if (json) {
+        setTicketStatus(status);
+
+        onSuccess();
+      } else {
+        onFail("Invalid ticket information");
+      }
+    } catch (e) {
+      console.log(e);
+
+      onFail("Internal server error");
+    }
+  }
+
+  async function fetchUsername(onSuccess: Function, onFail: Function) {
+
+    if (ticket.submittedById == 0)
+      return;
+
+    try {
+      const response = await fetch('http://localhost:8080/user/getName', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: ticket.submittedById
+        })
+      });
+      if (!response.ok) {
+        onFail("Invalid ticket information");
+        return;
+      }
+
+      const json = await response.json();
+
+      // If got json response, set context
+      if (json) {
+        setTicketUser(json.username);
+
+        onSuccess();
+      } else {
+        onFail("Invalid ticket information");
+      }
+    } catch (e) {
+      console.log(e);
+
+      onFail("Internal server error");
+    }
+  }
+  useEffect(() => {
+    fetchUsername(() => { }, (message: string) => { });
+  }, []);
+
   return (
-    <Card style={{ width: 400 }}>
-      <Card.Body>
-        <Form onSubmit={(e: any) => {
-          e.preventDefault();
 
-          console.log("Form submitted");
-        }}>
+    viewType == TicketPageType.PROCESS && ticketStatus != 0 ? <></>
+      :
+      <Card style={{ width: 400 }}>
+        <Card.Body>
+          <Form onSubmit={(e: any) => {
+            e.preventDefault();
 
-          <Card.Title>
-            <Form.Group as={Row} className="mb-3" controlId="ticketId">
+            console.log("Form submitted");
+          }}>
+
+            <Card.Title>
+              <Form.Group as={Row} className="mb-3" controlId="ticketId">
+                <Form.Label column sm="4">
+                  Ticket #
+                </Form.Label>
+                <Col>
+                  {viewType == TicketPageType.CREATE ?
+                    <Form.Control plaintext readOnly defaultValue="---" />
+                    :
+                    <Form.Control plaintext readOnly defaultValue={ticket.ticketId} />
+                  }
+                </Col>
+              </Form.Group>
+            </Card.Title>
+
+            <Form.Group as={Row} className="mb-3" controlId="submittedBy">
               <Form.Label column sm="4">
-                Ticket #
+                Submitted by
               </Form.Label>
               <Col>
-                {viewType == TicketPageType.CREATE ?
-                  <Form.Control plaintext readOnly defaultValue="---" />
-                  :
-                  <Form.Control plaintext readOnly defaultValue={ticket.ticketId} />
-                }
+                <Form.Control plaintext readOnly defaultValue={viewType == TicketPageType.CREATE || viewType == TicketPageType.VIEW ? `${userContext.username} (you)` : ticketUser} />
               </Col>
             </Form.Group>
-          </Card.Title>
 
-          <Form.Group as={Row} className="mb-3" controlId="submittedBy">
-            <Form.Label column sm="4">
-              Submitted by
-            </Form.Label>
-            <Col>
-              <Form.Control plaintext readOnly defaultValue={viewType == TicketPageType.CREATE ? `${userContext.username} (you)` : ticket.submittedById} />
-            </Col>
-          </Form.Group>
+            <InputGroup className="mb-3">
+              <Form.Label column sm="4">
+                Amount
+              </Form.Label>
+              <InputGroup.Text>$</InputGroup.Text>
+              {viewType == TicketPageType.CREATE ?
+                <Form.Control type='number' aria-label="Amount (to the nearest dollar)" placeholder="0.00" onChange={(e) => { setTicketAmount(parseFloat(e.currentTarget.value)); }} />
+                :
+                <Form.Control disabled aria-label="Amount (to the nearest dollar)" value={ticket.amount} />
+              }
+            </InputGroup>
 
-          <InputGroup className="mb-3">
-            <Form.Label column sm="4">
-              Amount
-            </Form.Label>
-            <InputGroup.Text>$</InputGroup.Text>
-            {viewType == TicketPageType.CREATE ?
-              <Form.Control aria-label="Amount (to the nearest dollar)" placeholder="0.00" />
-              :
-              <Form.Control disabled aria-label="Amount (to the nearest dollar)" defaultValue="19,300.43" />
+            <Form.Group className="mb-3">
+              <Form.Label>Description</Form.Label>
+              {viewType == TicketPageType.CREATE ?
+                <Form.Control as="textarea" rows={3} onChange={(e) => { setTicketDescription(e.currentTarget.value); }} />
+                :
+                <Form.Control as="textarea" rows={3} disabled value={ticket.description} />
+              }
+            </Form.Group>
+
+            {
+              viewType == TicketPageType.CREATE ?
+                <Button variant="success" onClick={(e) => {
+                  var currentTarget = e.currentTarget;
+                  currentTarget.disabled = true;
+
+                  fetchSubmitTicket(
+                    () => {
+                      currentTarget.disabled = false;
+                    }, (message: string) => {
+                      console.error(message);
+
+                      currentTarget.disabled = false;
+                    });
+                }}>Submit</Button>
+                :
+                (
+                  viewType == TicketPageType.PROCESS ?
+                    <>
+                      <Button variant="success" onClick={() => { fetchSetStatus(1, () => { }, () => { }) }}>Approve</Button>
+                      <Button variant="danger" onClick={() => { fetchSetStatus(2, () => { }, () => { }) }}>Deny</Button>
+                    </>
+                    :
+                    <>
+                    </>
+                )
+
             }
-          </InputGroup>
 
-          {
-            viewType == TicketPageType.CREATE ?
-              <Button variant="success">Submit</Button>
-              :
-              (
+            {
+              viewType == TicketPageType.VIEW ?
                 <>
-                  <Button variant="success">Approve</Button>
-                  <Button variant="danger">Deny</Button>
+                  <Form.Group as={Row} className="mb-3" controlId="status">
+                    <Form.Label column sm="4">
+                      Status:
+                    </Form.Label>
+                    <Col>
+                      <Form.Control disabled value={ticketStatus == 0 ? "processing" : (ticketStatus == 1 ? "approved" : "denied")} style={{ color: ticketStatus == 0 ? 'black' : (ticketStatus == 1 ? 'green' : 'red') }} />
+                    </Col>
+                  </Form.Group>
                 </>
-              )
+                :
+                <></>
+            }
 
-          }
-
-        </Form>
-      </Card.Body>
-    </Card>
+          </Form>
+        </Card.Body>
+      </Card>
   );
 
 }

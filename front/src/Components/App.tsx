@@ -8,6 +8,8 @@ import Home from '../Pages/Home';
 import Tickets from '../Pages/Tickets';
 import AuthenticatedRoute from './AuthenticatedRoute';
 import Login from '../Pages/Login';
+import Register from '../Pages/Register';
+import TicketProvider from './TicketContext';
 
 class App extends Component {
   render() {
@@ -18,10 +20,12 @@ class App extends Component {
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
               <Route path="login" element={<Login />} />
-              <Route path="register" element={<span>Register</span>} />
+              <Route path="register" element={<Register />} />
 
               <Route path="tickets" element={<AuthenticatedRoute>
-                <Tickets />
+                <TicketProvider>
+                  <Tickets />
+                </TicketProvider>
               </AuthenticatedRoute>} />
 
             </Route>

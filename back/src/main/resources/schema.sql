@@ -8,7 +8,9 @@ CREATE TABLE users (
 	user_id SERIAL PRIMARY KEY,
 
 	username TEXT NOT NULL,
-	password TEXT NOT NULL
+	password TEXT NOT NULL,
+
+  role TEXT NOT NULL
 );
 CREATE TABLE ticket (
 
@@ -24,5 +26,5 @@ CREATE TABLE ticket (
 );
 
 -- Insert sample data
-INSERT INTO users (username, password) VALUES ('system', '');
-INSERT INTO users (username, password) VALUES ('mr. manager', '0');
+INSERT INTO users (username, password, role) VALUES ('system', '', 'system');
+INSERT INTO users (username, password, role) VALUES ('mr. manager', '12345678', 'manager');

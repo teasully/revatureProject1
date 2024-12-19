@@ -32,7 +32,7 @@ function Navbar() {
                   }}>Log Out</NavDropdown.Item>
                 </NavDropdown>
               ) : (
-                <Nav.Link as={Link} to="/login">Log In</Nav.Link>
+                <Nav.Link as={Link} to="/login">Log In / Register</Nav.Link>
               )}
             </Nav>
           </BNavbar.Collapse>

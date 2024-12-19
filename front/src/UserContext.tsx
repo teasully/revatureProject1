@@ -1,5 +1,5 @@
 import { createContext, Dispatch, useReducer } from "react";
-import { User, UserType } from "./Entities/User";
+import { User, UserRole } from "./Entities/User";
 
 // Reducer actions
 export enum UserAction {
@@ -7,6 +7,8 @@ export enum UserAction {
 
   LOGIN,
   LOGOUT,
+
+  ASSIGN_MANAGER
 }
 
 // Handle user context actions
@@ -22,21 +24,24 @@ function userReducer(userState: User, reducerData: UserReducerData) {
       return {
         ...userState,
 
+        userId: reducerData.payload?.userId,
         username: reducerData.payload?.username,
-        role: UserType.MANAGER,
+        authenticated: true,
 
-        authenticated: true
+        role: UserRole.EMPLOYEE
       }
 
     case UserAction.LOGOUT:
       return new User();
 
-    default:
+    case UserAction.ASSIGN_MANAGER:
+      return {
+        ...userState,
 
-      if (reducerData.payload) {
-        console.log(reducerData.payload);
+        role: UserRole.MANAGER
       }
 
+    default:
       return userState;
   }
 }
