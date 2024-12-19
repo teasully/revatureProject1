@@ -5,6 +5,7 @@ import { UserRole } from "../Entities/User";
 import Ticket from "../Entities/Ticket";
 import { SetTicketsContext, TicketsContext } from "../Components/TicketContext";
 import { Button } from "react-bootstrap";
+import TicketRules from "../Components/TicketRules";
 
 export const enum TicketPageType {
   NONE,
@@ -104,6 +105,7 @@ function Tickets() {
       <p><strong>User role:</strong> {userContext.role == 1 ? 'Employee' : 'Manager'}</p>
 
       {
+        //<Button variant="warning" onClick={() => { fetchTicketsUnprocessed(() => { }, () => { }); setView(TicketPageType.PROCESS) }}>Pending Tickets</Button>
         userContext.role == UserRole.EMPLOYEE ? (
           <>
             <hr />
@@ -111,7 +113,6 @@ function Tickets() {
             <Button variant="secondary" onClick={() => { fetchTicketsFor(() => { }, () => { }); setView(TicketPageType.VIEW); }}>View Your Tickets</Button>
           </>) : (
           <>
-          //<Button variant="warning" onClick={() => { fetchTicketsUnprocessed(() => { }, () => { }); setView(TicketPageType.PROCESS) }}>Pending Tickets</Button>
           </>
         )
       }
@@ -119,18 +120,16 @@ function Tickets() {
 
       <h4>Ticket mode: {currentView == TicketPageType.CREATE ? "Create" : (currentView == TicketPageType.PROCESS ? "Pending" : "View")}</h4>
 
-      {currentView == TicketPageType.CREATE ?
-        <>
-          <p>To submit a ticket, ticket amount must be greater $0 and the description must not be empty</p>
-        </> : <></> }
+      <TicketRules currentView={currentView} />
 
       {
-        currentView == TicketPageType.CREATE ?
-          <TicketList tickets={[new Ticket(-1)]} viewType={currentView} />
-          :
-          <TicketList tickets={ticketContext} viewType={currentView} />
+        currentView != TicketPageType.CREATE && ticketContext.length == 0 ?
+          <>
+            <p>No tickets to display.</p>
+          </> : <>
+            <TicketList tickets={currentView == TicketPageType.CREATE ? [new Ticket(-1)] : ticketContext} viewType={currentView} />
+          </>
       }
-
     </>
   );
 }
