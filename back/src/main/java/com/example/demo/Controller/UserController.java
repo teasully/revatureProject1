@@ -14,6 +14,7 @@ import com.example.demo.Entity.User;
 
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(origins = "http://localhost:5174")
 public class UserController {
 
   private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -27,7 +28,6 @@ public class UserController {
 
   /// Endpoints
   // Get a user's name by userId
-  @CrossOrigin(origins = "http://localhost:5174")
   @PostMapping("/getName")
   public ResponseEntity<User> getUsername(@RequestBody User user) {
 
@@ -52,7 +52,6 @@ public class UserController {
   }
 
   // Check if username/password combo is correct
-  @CrossOrigin(origins = "http://localhost:5174")
   @PostMapping("/login")
   public ResponseEntity<User> login(@RequestBody User user) {
 
@@ -86,16 +85,15 @@ public class UserController {
   }
 
   // Register a new user account using username and password
-  @CrossOrigin(origins = "http://localhost:5174")
   @PostMapping("/register")
-  public ResponseEntity<Boolean> register(@RequestBody User user) {
+  public ResponseEntity<User> register(@RequestBody User user) {
 
     // Sanitize input
     var username = user.getUsername();
     var password = user.getPassword();
     if (username == null || password == null) {
       logger.error("register() => Missing username/password");
-      return ResponseEntity.status(422).body(false);
+      return ResponseEntity.status(422).body(null);
     }
     username = username.trim().toLowerCase();
     password = password.trim();
@@ -103,20 +101,20 @@ public class UserController {
     // Check username requirements
     if (username.length() == 0) {
       logger.error("register() => Invalid username length");
-      return ResponseEntity.status(400).body(false);
+      return ResponseEntity.status(400).body(null);
     }
 
     // Check password requirements
     if (password.length() < 8) {
       logger.error("register() => Invalid password length");
-      return ResponseEntity.status(400).body(false);
+      return ResponseEntity.status(400).body(null);
     }
 
     // Check user does not exists
     var existingUser = userService.getByUsername(username);
     if (existingUser != null) {
       logger.error("register() => Username already taken: " + username);
-      return ResponseEntity.status(409).body(false);
+      return ResponseEntity.status(409).body(null);
     }
 
     // Insert new user
@@ -125,10 +123,12 @@ public class UserController {
     newUser.setPassword(password);
     newUser.setRole("employee");
 
-    userService.insert(newUser);
+    newUser = userService.insert(newUser);
 
     // Return ok
+    newUser.setPassword(null);
+
     logger.info("register() => Registered new user: " + newUser.getUsername());
-    return ResponseEntity.ok(true);
+    return ResponseEntity.ok(newUser);
   }
 }

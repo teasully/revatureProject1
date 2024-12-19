@@ -16,7 +16,7 @@ async function fetchAuthenticate(username: string, password: string, dispatchFun
       })
     });
     if (!response.ok) {
-      onFail("Invalid user account");
+      onFail("Invalid user credentials");
       return;
     }
 

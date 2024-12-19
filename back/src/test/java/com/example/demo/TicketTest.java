@@ -2,7 +2,6 @@ package com.example.demo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -192,6 +191,125 @@ class TicketTest {
   }
 
   @Test
+  void setStatus_nullTicketId() {
+
+    var mock = new Ticket();
+    mock.setAmount(1f);
+    mock.setStatus(0);
+    mock.setSubmittedById(2);
+    mock.setProcessedById(3);
+    mock.setDescription("Test description");
+
+    //
+    var response = ticketController.setStatus(mock);
+
+    assertEquals(422, response.getStatusCode().value());
+    assertEquals(response.getBody(), false);
+  }
+
+  @Test
+  void setStatus_statusOutOfRange() {
+
+    var mock = new Ticket();
+    mock.setTicketId(1);
+    mock.setAmount(1f);
+    mock.setStatus(4);
+    mock.setSubmittedById(2);
+    mock.setProcessedById(3);
+    mock.setDescription("Test description");
+
+    //
+    var response = ticketController.setStatus(mock);
+
+    assertEquals(422, response.getStatusCode().value());
+    assertEquals(response.getBody(), false);
+  }
+
+  @Test
+  void setStatus_ticketNotExist() {
+
+    var mock = new Ticket();
+    mock.setTicketId(1);
+    mock.setAmount(1f);
+    mock.setStatus(1);
+    mock.setSubmittedById(2);
+    mock.setProcessedById(3);
+    mock.setDescription("Test description");
+
+    when(ticketRepository.findByTicketId(any(Integer.class))).thenReturn(null);
+
+    //
+    var response = ticketController.setStatus(mock);
+
+    assertEquals(404, response.getStatusCode().value());
+    assertEquals(response.getBody(), false);
+
+    verify(ticketRepository).findByTicketId(any(Integer.class));
+  }
+
+  @Test
+  void setStatus_duplicateStatus() {
+
+    var mock = new Ticket();
+    mock.setTicketId(1);
+    mock.setAmount(1f);
+    mock.setStatus(0);
+    mock.setSubmittedById(2);
+    mock.setProcessedById(3);
+    mock.setDescription("Test description");
+
+    var mockUpdated = new Ticket();
+    mockUpdated.setTicketId(1);
+    mockUpdated.setAmount(1f);
+    mockUpdated.setStatus(0);
+    mockUpdated.setSubmittedById(2);
+    mockUpdated.setProcessedById(3);
+    mockUpdated.setDescription("Test description");
+
+    when(ticketRepository.findByTicketId(any(Integer.class))).thenReturn(mock);
+
+    //
+    var response = ticketController.setStatus(mockUpdated);
+
+    assertEquals(200, response.getStatusCode().value());
+    assertEquals(response.getBody(), false);
+
+    verify(ticketRepository).findByTicketId(any(Integer.class));
+  }
+
+  @Test
+  void setStatus_userNotExist() {
+
+    var mock = new Ticket();
+    mock.setTicketId(1);
+    mock.setAmount(1f);
+    mock.setStatus(0);
+    mock.setSubmittedById(2);
+    mock.setProcessedById(3);
+    mock.setDescription("Test description");
+
+    var mockUpdated = new Ticket();
+    mockUpdated.setTicketId(1);
+    mockUpdated.setAmount(1f);
+    mockUpdated.setStatus(1);
+    mockUpdated.setSubmittedById(2);
+    mockUpdated.setProcessedById(3);
+    mockUpdated.setDescription("Test description");
+
+    when(ticketRepository.findByTicketId(any(Integer.class))).thenReturn(mock);
+    when(userRepository.findByUserId(any(Integer.class))).thenReturn(null);
+
+    //
+    var response = ticketController.setStatus(mockUpdated);
+
+    assertEquals(404, response.getStatusCode().value());
+    assertEquals(response.getBody(), false);
+
+    verify(ticketRepository).findByTicketId(any(Integer.class));
+    verify(userRepository).findByUserId(any(Integer.class));
+  }
+
+  @Test
   void getFor() {
 
     var mock0 = new Ticket();
@@ -237,6 +355,19 @@ class TicketTest {
     assertEquals(mock1.getDescription(), responseTickets.get(1).getDescription());
 
     verify(ticketRepository).findAllBySubmittedById(any(Integer.class));
+  }
+
+  @Test
+  void getFor_nullUserId() {
+
+    var mockUser = new User();
+
+    //
+    var response = ticketController.getFor(mockUser);
+    var responseTickets = response.getBody();
+
+    assertEquals(422, response.getStatusCode().value());
+    assertEquals(null, responseTickets);
   }
 
   @Test

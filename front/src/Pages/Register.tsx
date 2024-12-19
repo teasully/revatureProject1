@@ -2,7 +2,19 @@ import { useContext, useEffect } from "react";
 import { UserDispatch, UserAction, UserContext } from "../UserContext";
 import { Link, useNavigate } from "react-router-dom";
 
-// Attempt to register user
+export default function Register() {
+
+  // Check successful login; redirect to home page
+  const userContext = useContext(UserContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (userContext.authenticated) {
+      navigate("/");
+    }
+  }, [userContext]);
+
+  // Attempt to register user
 async function fetchRegister(username: string, password: string, dispatchFunction: any, onSuccess: Function, onFail: Function) {
   try {
     const response = await fetch('http://localhost:8080/user/register', {
@@ -23,7 +35,7 @@ async function fetchRegister(username: string, password: string, dispatchFunctio
     const json = await response.json();
 
     // If got json response, set context
-    if (json == true) {
+    if (json) {
       onSuccess();
 
       dispatchFunction?.({
@@ -41,18 +53,6 @@ async function fetchRegister(username: string, password: string, dispatchFunctio
     onFail("Internal server error");
   }
 }
-
-export default function Register() {
-
-  // Check successful login; redirect to home page
-  const userContext = useContext(UserContext);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (userContext.authenticated) {
-      navigate("/");
-    }
-  }, [userContext]);
 
   // Login form; call user dispatch on submit
   const userDispatch = useContext(UserDispatch);

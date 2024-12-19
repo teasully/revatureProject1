@@ -17,8 +17,8 @@ export const enum TicketPageType {
 
 function Tickets() {
 
-  const [currentView, setView] = useState(TicketPageType.CREATE);
   const userContext = useContext(UserContext);
+  const [currentView, setView] = useState(userContext.role == UserRole.EMPLOYEE ? TicketPageType.CREATE : TicketPageType.PROCESS);
 
   const ticketContext = useContext(TicketsContext);
   const setTicketContext = useContext(SetTicketsContext);
@@ -88,27 +88,41 @@ function Tickets() {
 
   // Load current tickets on page load
   useEffect(() => {
-    fetchTicketsFor(() => { }, () => { });
+    if (userContext.role == UserRole.EMPLOYEE)
+      fetchTicketsFor(() => { }, () => { });
+    else
+      fetchTicketsUnprocessed(() => { }, () => { });
   }, []);
 
   return (
     <>
       <h1>Tickets</h1>
       <p>
-        This is where you can submit new reimbursment tickets. If you are a manager, you can process those tickets.
+        This page is for the creation and management of reimbursement tickets. If your role is employee, you can submit a new reimbursement ticket to be processed. You can also view you current and past tickets. If your role is manager, you can process unprocessed tickets.
       </p>
 
       <p><strong>User role:</strong> {userContext.role == 1 ? 'Employee' : 'Manager'}</p>
-      <hr />
-
-      <Button onClick={() => { setView(TicketPageType.CREATE); }}>Create Ticket</Button>
-      <Button variant="secondary" onClick={() => { fetchTicketsFor(() => { }, () => { }); setView(TicketPageType.VIEW); }}>View Your Tickets</Button>
 
       {
-        userContext.role == UserRole.MANAGER ? <Button variant="warning" onClick={() => { fetchTicketsUnprocessed(() => { }, () => { }); setView(TicketPageType.PROCESS) }}>Process Tickets</Button> : <></>
+        userContext.role == UserRole.EMPLOYEE ? (
+          <>
+            <hr />
+            <Button onClick={() => { setView(TicketPageType.CREATE); }}>Create Ticket</Button>
+            <Button variant="secondary" onClick={() => { fetchTicketsFor(() => { }, () => { }); setView(TicketPageType.VIEW); }}>View Your Tickets</Button>
+          </>) : (
+          <>
+          //<Button variant="warning" onClick={() => { fetchTicketsUnprocessed(() => { }, () => { }); setView(TicketPageType.PROCESS) }}>Pending Tickets</Button>
+          </>
+        )
       }
+      <hr />
 
-      <h4>Ticket mode: {currentView == TicketPageType.CREATE ? "Create" : (currentView == TicketPageType.PROCESS ? "Process" : "View")}</h4>
+      <h4>Ticket mode: {currentView == TicketPageType.CREATE ? "Create" : (currentView == TicketPageType.PROCESS ? "Pending" : "View")}</h4>
+
+      {currentView == TicketPageType.CREATE ?
+        <>
+          <p>To submit a ticket, ticket amount must be greater $0 and the description must not be empty</p>
+        </> : <></> }
 
       {
         currentView == TicketPageType.CREATE ?

@@ -183,7 +183,7 @@ export default function TicketDisplay(props: TicketListProps) {
               </Form.Label>
               <InputGroup.Text>$</InputGroup.Text>
               {viewType == TicketPageType.CREATE ?
-                <Form.Control type='number' aria-label="Amount (to the nearest dollar)" placeholder="0.00" onChange={(e) => { setTicketAmount(parseFloat(e.currentTarget.value)); }} />
+                <Form.Control id="createTicketAmount" type='number' aria-label="Amount (to the nearest dollar)" placeholder="0.00" onChange={(e) => { setTicketAmount(parseFloat(e.currentTarget.value)); }} />
                 :
                 <Form.Control disabled aria-label="Amount (to the nearest dollar)" value={ticket.amount} />
               }
@@ -192,38 +192,57 @@ export default function TicketDisplay(props: TicketListProps) {
             <Form.Group className="mb-3">
               <Form.Label>Description</Form.Label>
               {viewType == TicketPageType.CREATE ?
-                <Form.Control as="textarea" rows={3} onChange={(e) => { setTicketDescription(e.currentTarget.value); }} />
+                <Form.Control id="createTicketDescription" as="textarea" rows={3} onChange={(e) => { setTicketDescription(e.currentTarget.value); }} />
                 :
                 <Form.Control as="textarea" rows={3} disabled value={ticket.description} />
               }
             </Form.Group>
 
             {
-              viewType == TicketPageType.CREATE ?
-                <Button variant="success" onClick={(e) => {
-                  var currentTarget = e.currentTarget;
-                  currentTarget.disabled = true;
+              viewType == TicketPageType.CREATE ? (
+                <>
+                  <Button variant="success" onClick={(e) => {
+                    var currentTarget = e.currentTarget;
+                    currentTarget.disabled = true;
 
-                  fetchSubmitTicket(
-                    () => {
-                      currentTarget.disabled = false;
-                    }, (message: string) => {
-                      console.error(message);
+                    let amountText = (document.getElementById("createTicketAmount") as HTMLInputElement);
+                    let descriptionText = (document.getElementById("createTicketDescription") as HTMLInputElement);
 
-                      currentTarget.disabled = false;
-                    });
-                }}>Submit</Button>
-                :
-                (
-                  viewType == TicketPageType.PROCESS ?
-                    <>
-                      <Button variant="success" onClick={() => { fetchSetStatus(1, () => { }, () => { }) }}>Approve</Button>
-                      <Button variant="danger" onClick={() => { fetchSetStatus(2, () => { }, () => { }) }}>Deny</Button>
-                    </>
-                    :
-                    <>
-                    </>
-                )
+                    let submitMessage = (document.getElementById("submitMessage") as HTMLElement);
+
+                    fetchSubmitTicket(
+                      () => {
+                        currentTarget.disabled = false;
+
+                        amountText.value = descriptionText.value = "";
+                        setTicketAmount(0);
+                        setTicketDescription("");
+
+                        submitMessage.innerHTML = "Ticket submitted!"
+                        submitMessage.style.color = "green";
+                      }, (message: string) => {
+                        console.error(message);
+
+                        currentTarget.disabled = false;
+
+                        submitMessage.innerHTML = "Error submitting ticket"
+                        submitMessage.style.color = "red";
+                      });
+                  }}>Submit</Button>
+
+                  <hr />
+                  <p id='submitMessage'></p>
+                </>
+              ) : (
+                viewType == TicketPageType.PROCESS ?
+                  <>
+                    <Button variant="success" onClick={() => { fetchSetStatus(1, () => { }, () => { }) }}>Approve</Button>
+                    <Button variant="danger" onClick={() => { fetchSetStatus(2, () => { }, () => { }) }}>Deny</Button>
+                  </>
+                  :
+                  <>
+                  </>
+              )
 
             }
 
@@ -235,7 +254,7 @@ export default function TicketDisplay(props: TicketListProps) {
                       Status:
                     </Form.Label>
                     <Col>
-                      <Form.Control disabled value={ticketStatus == 0 ? "processing" : (ticketStatus == 1 ? "approved" : "denied")} style={{ color: ticketStatus == 0 ? 'black' : (ticketStatus == 1 ? 'green' : 'red') }} />
+                      <Form.Control disabled value={ticketStatus == 0 ? "pending" : (ticketStatus == 1 ? "approved" : "denied")} style={{ color: ticketStatus == 0 ? 'black' : (ticketStatus == 1 ? 'green' : 'red') }} />
                     </Col>
                   </Form.Group>
                 </>

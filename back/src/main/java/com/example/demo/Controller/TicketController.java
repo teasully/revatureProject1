@@ -18,6 +18,7 @@ import com.example.demo.Entity.User;
 
 @RestController
 @RequestMapping("/ticket")
+@CrossOrigin(origins = "http://localhost:5174")
 public class TicketController {
 
   private static final Logger logger = LoggerFactory.getLogger(TicketController.class);
@@ -35,7 +36,6 @@ public class TicketController {
 
   /// Endpoints
   // Create a new ticket
-  @CrossOrigin(origins = "http://localhost:5174")
   @PostMapping("/submit")
   public ResponseEntity<Ticket> submit(@RequestBody Ticket ticket) {
 
@@ -89,7 +89,6 @@ public class TicketController {
   }
 
   // Set ticket status
-  @CrossOrigin(origins = "http://localhost:5174")
   @PostMapping("/setStatus")
   public ResponseEntity<Boolean> setStatus(@RequestBody Ticket ticket) {
 
@@ -139,7 +138,6 @@ public class TicketController {
   }
 
   // Get tickets by user
-  @CrossOrigin(origins = "http://localhost:5174")
   @PostMapping("/getFor")
   public ResponseEntity<List<Ticket>> getFor(@RequestBody User user) {
 
@@ -158,7 +156,6 @@ public class TicketController {
   }
 
   // Get all unprocessed tickets (for managers)
-  @CrossOrigin(origins = "http://localhost:5174")
   @PostMapping("/getUnprocessed")
   public ResponseEntity<List<Ticket>> getUnprocessed() {
 
