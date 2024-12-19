@@ -1,5 +1,7 @@
 package com.example.demo.Controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +15,8 @@ import com.example.demo.Entity.User;
 @RestController
 @RequestMapping("/user")
 public class UserController {
+
+  private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
   UserService userService;
 
@@ -30,17 +34,20 @@ public class UserController {
     // Sanitize input
     var id = user.getUserId();
     if (id == null) {
+      logger.error("getUsername() => Missing userId");
       return ResponseEntity.status(422).body(null);
     }
 
     // Check user exists with username and password combo
     var existingUser = userService.getById(id);
     if (existingUser == null) {
+      logger.error("getUsername() => User already exists: " + user.getUsername());
       return ResponseEntity.status(404).body(null);
     }
 
     // Return ok
     user.setUsername(existingUser.getUsername());
+    logger.info("getUsername() => Returning username: " + user.getUsername());
     return ResponseEntity.ok(user);
   }
 
@@ -53,6 +60,7 @@ public class UserController {
     var username = user.getUsername();
     var password = user.getPassword();
     if (username == null || password == null) {
+      logger.error("login() => Missing username/password");
       return ResponseEntity.status(422).body(null);
     }
     username = username.trim().toLowerCase();
@@ -60,29 +68,33 @@ public class UserController {
 
     // Make sure not logging in as system
     if (username.equals("system")) {
+      logger.error("login() => Attempting to login as 'system' user");
       return ResponseEntity.status(401).body(null);
     }
 
     // Check user exists with username and password combo
     var existingUser = userService.getByUsernameAndPassword(username, password);
     if (existingUser == null) {
+      logger.error("login() => Invalid username/password");
       return ResponseEntity.status(401).body(null);
     }
 
     // Return ok
     existingUser.setPassword(null);
+    logger.info("login() => Login success: " + existingUser.getUsername());
     return ResponseEntity.ok(existingUser);
   }
 
   // Register a new user account using username and password
   @CrossOrigin(origins = "http://localhost:5174")
   @PostMapping("/register")
-  public ResponseEntity<Boolean> RegisterUser(@RequestBody User user) {
+  public ResponseEntity<Boolean> register(@RequestBody User user) {
 
     // Sanitize input
     var username = user.getUsername();
     var password = user.getPassword();
     if (username == null || password == null) {
+      logger.error("register() => Missing username/password");
       return ResponseEntity.status(422).body(false);
     }
     username = username.trim().toLowerCase();
@@ -90,17 +102,20 @@ public class UserController {
 
     // Check username requirements
     if (username.length() == 0) {
+      logger.error("register() => Invalid username length");
       return ResponseEntity.status(400).body(false);
     }
 
     // Check password requirements
     if (password.length() < 8) {
+      logger.error("register() => Invalid password length");
       return ResponseEntity.status(400).body(false);
     }
 
     // Check user does not exists
     var existingUser = userService.getByUsername(username);
     if (existingUser != null) {
+      logger.error("register() => Username already taken: " + username);
       return ResponseEntity.status(409).body(false);
     }
 
@@ -113,6 +128,7 @@ public class UserController {
     userService.insert(newUser);
 
     // Return ok
+    logger.info("register() => Registered new user: " + newUser.getUsername());
     return ResponseEntity.ok(true);
   }
 }

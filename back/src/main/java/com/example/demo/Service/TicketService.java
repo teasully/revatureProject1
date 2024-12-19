@@ -17,7 +17,7 @@ public class TicketService {
   }
 
   // Insert a new ticket
-  public Ticket insertTicket(Ticket ticket) {
+  public Ticket insert(Ticket ticket) {
     return ticketRepository.save(ticket);
   }
 

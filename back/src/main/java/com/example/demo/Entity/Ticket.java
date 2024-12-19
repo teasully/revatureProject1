@@ -1,5 +1,7 @@
 package com.example.demo.Entity;
 
+import java.util.Objects;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -84,5 +86,4 @@ public class Ticket {
   public void setDescription(String description) {
     this.description = description;
   }
-
 }
