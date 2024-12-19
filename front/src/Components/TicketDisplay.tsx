@@ -89,6 +89,7 @@ export default function TicketDisplay(props: TicketListProps) {
       // If got json response, set context
       if (json) {
         setTicketStatus(status);
+        setTicketsContext?.(ticketsContext.filter(e => e.ticketId != ticket.ticketId));
 
         onSuccess();
       } else {
@@ -143,8 +144,7 @@ export default function TicketDisplay(props: TicketListProps) {
 
   return (
 
-    viewType == TicketPageType.PROCESS && ticketStatus != 0 ? <></>
-      :
+
       <Card style={{ width: 400 }}>
         <Card.Body>
           <Form onSubmit={(e: any) => {
